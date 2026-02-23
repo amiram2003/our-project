@@ -49,19 +49,19 @@ while True:
                 if FLAG >= 15:
                     # if more than 15 consecutive frames have EAR below the threshold, trigger the alert
                     if not pygame.mixer.get_busy():
-                        #alert_sound.play()
+                        alert_sound.play()
                     # Uncomment the following line to print the flag value (for debugging purposes)
-                     print(f"ALERT{FLAG}")
+                        # print(f"ALERT{FLAG}")
             else:            
                 FLAG = 0
-    #   Uncomment the following lines to visualize the eye landmarks on the frame (for debugging purposes)
-            for pt in left_eye_marks:
-                cv2.circle(frame, pt, 2, (0, 255, 0), -1)
-            for pt in right_eye_marks:
-                cv2.circle(frame, pt, 2, (0, 255, 0), -1)
-        cv2.imshow('landmarks', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # Uncomment the following lines to visualize the eye landmarks on the frame (for debugging purposes)
+        #     for pt in left_eye_marks:
+        #         cv2.circle(frame, pt, 2, (0, 255, 0), -1)
+        #     for pt in right_eye_marks:
+        #         cv2.circle(frame, pt, 2, (0, 255, 0), -1)
+        # cv2.imshow('landmarks', frame)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
     else:
         print("No face detected, shutting down.")
         break
