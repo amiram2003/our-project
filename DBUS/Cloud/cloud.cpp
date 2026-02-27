@@ -1,4 +1,4 @@
-#include "Cloud.h"
+#include "cloud.h"
 #include <QNetworkInterface>
 #include <QProcess>
 

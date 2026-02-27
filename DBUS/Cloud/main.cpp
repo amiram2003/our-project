@@ -1,6 +1,6 @@
 #include <QCoreApplication>
 #include <QDBusConnection>
-#include "Cloud.h"
+#include "cloud.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 
     Cloud cloud;
 
-    QDBusConnection connection = QDBusConnection::systemBus();
+    QDBusConnection connection = QDBusConnection::sessionBus();
     connection.registerService("com.raspberry.cloud");
     connection.registerObject(
         "/",
