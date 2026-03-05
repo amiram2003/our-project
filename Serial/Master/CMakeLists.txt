@@ -9,8 +9,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core SerialPort)
 
 add_executable(MasterApp
     main.cpp
-    master.cpp
-    master.h
+    SerialCommunication.cpp
+    SerialCommunication.h
 )
 
 target_link_libraries(MasterApp PRIVATE Qt6::Core Qt6::SerialPort)
