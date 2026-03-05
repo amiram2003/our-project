@@ -37,7 +37,12 @@ QString Controller::getMacAddress()
 
 void Controller::requestRestart()
 {
+    //< Is this really work ?! 
     if (m_interface->isValid()) {
         m_interface->call("requestRestart");
     }
+}
+
+void connectToWifi(const QString& ssid, const QString& pass) {
+    //< To be implemented !!    
 }
