@@ -6,7 +6,7 @@ Window {
     height: 480
     visible: true
     title: "Car Dashboard"
-    color: "#0a0a0a" // خلفية سوداء احترافية
+    color: "#0a0a0a" 
 
     Rectangle {
         id: speedometer
@@ -14,7 +14,7 @@ Window {
         anchors.centerIn: parent
         radius: 150
         color: "transparent"
-        border.color: "#00d1ff" // لون أزرق نيون
+        border.color: "#00d1ff" 
         border.width: 8
 
         Column {

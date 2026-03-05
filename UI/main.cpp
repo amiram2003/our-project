@@ -6,7 +6,6 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    // بنقول للبرنامج حمل الـ QML من ملف الـ Resources
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     engine.load(url);
 
