@@ -6,7 +6,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
     MasterManager master;
 
-    if (master.connectPort("/dev/pts/7")) {
+    if (master.connectPort("/dev/ttyS0")) {
         QTimer *timer = new QTimer(&a);
         QObject::connect(timer, &QTimer::timeout, &master, &MasterManager::sendPing);
         timer->start(3000); 

@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
     SlaveManager slave;
 
-    if (!slave.listenOnPort("/dev/pts/8")) {
+    if (!slave.listenOnPort("/dev/ttyS1")) {
         return -1;
     }
 
