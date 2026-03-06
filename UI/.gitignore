@@ -1,0 +1,27 @@
+# Build directories
+build/
+bin/
+obj/
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+CMakeSettings.json
+cmake_install.cmake
+Makefile
+
+# Qt Generated files
+*_autogen/
+*.qmlc
+*.jsc
+.qtc_clangd/
+
+# VS Code & IDEs
+.vscode/
+.idea/
+*.swp
+*.user
+
+# System files
+.DS_Store
+Thumbs.db
