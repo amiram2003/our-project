@@ -2,30 +2,29 @@
 #define CLOUD_H
 
 #include <QObject>
+#include <QString>
 
 class Cloud : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString ipAddress READ ipAddress)
-    Q_PROPERTY(QString macAddress READ macAddress)
+    Q_CLASSINFO("D-Bus Interface", "local.automotive.Cloud")
 
 public:
     explicit Cloud(QObject *parent = nullptr);
 
-    QString ipAddress() const;
-    QString macAddress() const;
-
 public slots:
-    void requestRestart();
+    QString getIP();
+    QString getMacAddress();
+    QString getFrequencyBands();
+
+    void connectToWifi(const QString& ssid, const QString& pass);
 
 signals:
-    void dataChanged(const QString &newIp);
+    void sigWifiIPChanged(const QString &newIp);
 
 private:
     QString m_ip;
-    QString m_mac;
-
-    void updateNetworkData();
+    QString m_mac; 
 };
 
 #endif
