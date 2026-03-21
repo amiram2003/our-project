@@ -18,14 +18,20 @@ public slots:
     QString getMacAddress();
     double getFrequencyBands();    
 
-    void connectToWifi(const QString& ssid, const QString& pass);
+    void connectToWifi(const QString& ssid, const QString& pass); 
+
+    void requestReboot();
 
 signals:
     void sigWifiIPChanged(const QString &newIp);
     void sigEthernetIPChanged(const QString &newIp); 
 
+    void sigRebootRequested();
+
+private slots:
+    void onConnectionFinished();
+
 private:
-    
     QString getInterfaceIP(const QString &interfaceName);
     QString m_ip;
     QString m_ethIp;

@@ -1,6 +1,5 @@
 #include <QCoreApplication>
 #include "controller.h"
-#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -8,10 +7,8 @@ int main(int argc, char *argv[])
 
     Controller controller;
     
-    qDebug() << "IP:" << controller.getIpAddress();
-    qDebug() << "MAC:" << controller.getMacAddress();
-    
-    controller.requestRestart();
+    /* Execute the system reboot via D-Bus */
+    controller.requestSystemReboot();
 
     return app.exec();
 }

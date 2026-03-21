@@ -8,6 +8,13 @@ Cloud::Cloud(QObject *parent) : QObject(parent)
     m_mac = getMacAddress(); 
 }
 
+void Cloud::requestReboot()
+{
+    qDebug() << "Cloud: Received Reboot Request from UI. Emitting signal...";
+    // جهاد هنا بتعلن لكل الخدمات إن فيه ريبوت هيحصل
+    emit sigRebootRequested();
+}
+
 QString Cloud::getInterfaceIP(const QString &interfaceName)
 {
     const auto interfaces = QNetworkInterface::allInterfaces();
@@ -72,5 +79,15 @@ double Cloud::getFrequencyBands()
 void Cloud::connectToWifi(const QString& ssid, const QString& pass)
 {
     QString command = QString("sudo nmcli dev wifi connect '%1' password '%2'").arg(ssid, pass);
-    QProcess::startDetached("sh", QStringList() << "-c" << command);
+    QProcess *proc = new QProcess(this);
+    
+    connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(onConnectionFinished()));
+    
+    proc->start("sh", QStringList() << "-c" << command);
+}
+
+void Cloud::onConnectionFinished()
+{
+    this->getIP();
+    sender()->deleteLater();
 }

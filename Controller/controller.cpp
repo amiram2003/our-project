@@ -1,13 +1,21 @@
 #include "controller.h"
 #include <QDebug>
+#include <QtDBus/QDBusReply>
 
 Controller::Controller(QObject *parent) : QObject(parent)
 {
+    /**
+     * Initialize the D-Bus interface for systemd-logind.
+     * Service: org.freedesktop.login1
+     * Path: /org/freedesktop/login1
+     * Interface: org.freedesktop.login1.Manager
+     * Bus: System Bus (Required for power management)
+     */
     m_interface = new QDBusInterface(
-        "com.raspberry.cloud",
-        "/",
-        "com.raspberry.network",
-        QDBusConnection::sessionBus(),
+        "org.freedesktop.login1",
+        "/org/freedesktop/login1",
+        "org.freedesktop.login1.Manager",
+        QDBusConnection::systemBus(),
         this
     );
 }
@@ -15,34 +23,24 @@ Controller::Controller(QObject *parent) : QObject(parent)
 Controller::~Controller() {
     if (m_interface) {
         delete m_interface;
-        m_interface = nullptr;
     }
 }
 
-QString Controller::getIpAddress()
+void Controller::requestSystemReboot()
 {
-    if (m_interface->isValid()) {
-        return m_interface->property("ipAddress").toString();
+    if (m_interface && m_interface->isValid()) {
+        qDebug() << "Sending D-Bus Reboot signal...";
+        
+        /**
+         * Call the 'Reboot' method. 
+         * The 'true' parameter allows for interactive authorization if necessary.
+         */
+        QDBusMessage reply = m_interface->call("Reboot", true);
+        
+        if (reply.type() == QDBusMessage::ErrorMessage) {
+            qCritical() << "D-Bus Operation Failed:" << reply.errorMessage();
+        }
+    } else {
+        qCritical() << "Interface Invalid:" << m_interface->lastError().message();
     }
-    return QString();
-}
-
-QString Controller::getMacAddress()
-{
-    if (m_interface->isValid()) {
-        return m_interface->property("macAddress").toString();
-    }
-    return QString();
-}
-
-void Controller::requestRestart()
-{
-    //< Is this really work ?! 
-    if (m_interface->isValid()) {
-        m_interface->call("requestRestart");
-    }
-}
-
-void connectToWifi(const QString& ssid, const QString& pass) {
-    //< To be implemented !!    
 }

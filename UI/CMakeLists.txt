@@ -23,3 +23,4 @@ target_link_libraries(CarGUI PRIVATE
     Qt6::Quick
     Qt6::DBus
 )
+

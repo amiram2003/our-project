@@ -1,15 +1,3 @@
-/**
- * @file controller.h
- * @author your name (you@domain.com)
- * @brief This class handle differnet interfaces and get all network related informations
- *          communicate with network manager to get data from
- *          expose different data iver dbus 
- * @version 0.1
- * @date 2026-03-05
- * 
- * @copyright Copyright (c) 2026
- * 
- */
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
@@ -23,17 +11,12 @@ class Controller : public QObject
 public:
     explicit Controller(QObject *parent = nullptr);
     ~Controller();
-    QString getIpAddress();
-    QString getMacAddress();
-    void requestRestart();
-    
+
     /**
-     * @brief connect to wifi 
-     * 
-     * @param ssid 
-     * @param pass 
+     * @brief Sends a Reboot request to the system-level D-Bus manager.
+     * Targets the org.freedesktop.login1 interface.
      */
-    void connectToWifi(const QString& ssid, const QString& pass);
+    void requestSystemReboot();
 
 private:
     QDBusInterface *m_interface;
