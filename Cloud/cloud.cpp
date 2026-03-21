@@ -8,13 +8,6 @@ Cloud::Cloud(QObject *parent) : QObject(parent)
     m_mac = getMacAddress(); 
 }
 
-void Cloud::requestReboot()
-{
-    qDebug() << "Cloud: Received Reboot Request from UI. Emitting signal...";
-    // جهاد هنا بتعلن لكل الخدمات إن فيه ريبوت هيحصل
-    emit sigRebootRequested();
-}
-
 QString Cloud::getInterfaceIP(const QString &interfaceName)
 {
     const auto interfaces = QNetworkInterface::allInterfaces();

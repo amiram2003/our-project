@@ -104,14 +104,13 @@ Window {
             }
         }
         
-        // Reboot Button Section
+        // --- Reboot Button Section (UPDATED) ---
         Column {
             anchors { bottom: parent.bottom; bottomMargin: 10; horizontalCenter: parent.horizontalCenter }
             spacing: 5
             
-            // الزيادة هنا: ضفنا MouseArea عشان يحس بالضغط
             MouseArea {
-                width: 40; height: 50 // مساحة مناسبة للضغط
+                width: 60; height: 60 
                 anchors.horizontalCenter: parent.horizontalCenter
                 
                 Column {
@@ -119,7 +118,7 @@ Window {
                     spacing: 5
                     Image { 
                         source: "qrc:/icons/reboot.png"
-                        width: 30; height: 30; 
+                        width: 35; height: 35; 
                         fillMode: Image.PreserveAspectFit; 
                         anchors.horizontalCenter: parent.horizontalCenter 
                     }
@@ -132,9 +131,8 @@ Window {
                     }
                 }
                 
-                // اللحظة الحاسمة: بننادي الـ C++ اللي بيكلم جهاد
                 onClicked: {
-                    console.log("Rebooting System via Cloud...")
+                    console.log("UI: Calling Reboot directly via SystemController...")
                     dbusData.requestReboot() 
                 }
             }
@@ -168,7 +166,7 @@ Window {
     // --- WIFI CREDENTIALS POPUP ---
     Popup {
         id: wifiPopup
-        width: 420; height: 440 // Optimized height for new keyboard rows
+        width: 420; height: 440 
         modal: true
         focus: true
         x: (parent.width - width) / 2
@@ -180,7 +178,6 @@ Window {
             border.color: "#00eaff"
         }
 
-        // --- Container for Input Fields ---
         Column {
             id: popupContent
             width: parent.width - 20
@@ -229,7 +226,6 @@ Window {
             }
         }
 
-        // --- THE VIRTUAL KEYBOARD (Anchored to Bottom) ---
         CustomKeyboard {
             id: myKeyboard
             width: parent.width - 20
@@ -240,7 +236,6 @@ Window {
             visible: false 
         }
     }
-    
-    // Smooth animation for speedometer changes
+     // Smooth animation for speedometer changes
     Behavior on speed { NumberAnimation { duration: 800; easing.type: Easing.OutCubic } }
 }

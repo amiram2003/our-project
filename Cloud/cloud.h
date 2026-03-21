@@ -20,13 +20,11 @@ public slots:
 
     void connectToWifi(const QString& ssid, const QString& pass); 
 
-    void requestReboot();
 
 signals:
     void sigWifiIPChanged(const QString &newIp);
     void sigEthernetIPChanged(const QString &newIp); 
 
-    void sigRebootRequested();
 
 private slots:
     void onConnectionFinished();
