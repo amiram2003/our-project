@@ -13,17 +13,22 @@ public:
     explicit Cloud(QObject *parent = nullptr);
 
 public slots:
-    QString getIP();
+    QString getIP();              
+    QString getEthernetIP();       
     QString getMacAddress();
-    QString getFrequencyBands();
+    double getFrequencyBands();    
 
     void connectToWifi(const QString& ssid, const QString& pass);
 
 signals:
     void sigWifiIPChanged(const QString &newIp);
+    void sigEthernetIPChanged(const QString &newIp); 
 
 private:
+    
+    QString getInterfaceIP(const QString &interfaceName);
     QString m_ip;
+    QString m_ethIp;
     QString m_mac; 
 };
 

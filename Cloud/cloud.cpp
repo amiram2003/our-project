@@ -1,4 +1,3 @@
-
 #include "cloud.h"
 #include <QNetworkInterface>
 #include <QProcess>
@@ -9,53 +8,69 @@ Cloud::Cloud(QObject *parent) : QObject(parent)
     m_mac = getMacAddress(); 
 }
 
-QString Cloud::getIP()
+QString Cloud::getInterfaceIP(const QString &interfaceName)
 {
     const auto interfaces = QNetworkInterface::allInterfaces();
     for (const QNetworkInterface &iface : interfaces) {
-        if (iface.flags().testFlag(QNetworkInterface::IsUp) && 
-            !iface.flags().testFlag(QNetworkInterface::IsLoopBack)) {
+        if (iface.name().contains(interfaceName) && iface.flags().testFlag(QNetworkInterface::IsUp)) {
             const auto entries = iface.addressEntries();
             for (const QNetworkAddressEntry &entry : entries) {
-                if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
-                    QString currentIp = entry.ip().toString();
-                    if (currentIp != m_ip) {
-                        m_ip = currentIp;
-                        emit sigWifiIPChanged(m_ip);
-                    }
-                    return m_ip;
+                if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol && !entry.ip().isLoopback()) {
+                    return entry.ip().toString();
                 }
             }
         }
     }
-    return "Disconnected";
+    return "";
+}
+
+QString Cloud::getIP() {
+    QString currentIp = getInterfaceIP("wlan");
+    if (currentIp != m_ip) {
+        m_ip = currentIp;
+        emit sigWifiIPChanged(m_ip);
+    }
+    return m_ip;
+}
+
+QString Cloud::getEthernetIP() {
+    QString currentIp = getInterfaceIP("eth");
+    if (currentIp != m_ethIp) {
+        m_ethIp = currentIp;
+        emit sigEthernetIPChanged(m_ethIp);
+    }
+    return m_ethIp;
 }
 
 QString Cloud::getMacAddress()
 {
     if (m_mac.isEmpty() || m_mac == "00:00:00:00:00:00") {
         for (const QNetworkInterface &iface : QNetworkInterface::allInterfaces()) {
-            if (iface.name().contains("wlan") || iface.name().contains("wifi")) {
+            if (iface.name().contains("wlan") || iface.name().contains("eth")) {
                 m_mac = iface.hardwareAddress();
-                break;
+                if (!m_mac.isEmpty()) break;
             }
         }
     }
     return m_mac.isEmpty() ? "00:00:00:00:00:00" : m_mac;
 }
 
-QString Cloud::getFrequencyBands()
+double Cloud::getFrequencyBands()
 {
-   QProcess proc;
-   proc.start("iwgetid", QStringList() << "-f");
-   if (!proc.waitForFinished()) return "Unknown";
-   return QString(proc.readAllStandardOutput()).trimmed();
+    QProcess proc;
+    proc.start("iwgetid", QStringList() << "-f"); 
+    if (!proc.waitForFinished()) return 0.0;
+    
+    QString output = QString(proc.readAllStandardOutput()).trimmed();
+    
+    if (output.contains("5.")) return 5.0;
+    if (output.contains("2.4")) return 2.4;
+    
+    return 0.0;
 }
 
 void Cloud::connectToWifi(const QString& ssid, const QString& pass)
 {
-    qDebug() << "Attempting to connect to:" << ssid;
-    QString command = QString("sudo nmcli dev wifi connect '%1' password '%2' name '%1' ifname wlan0").arg(ssid, pass);
-    qDebug() << "Executing command:" << command;
+    QString command = QString("sudo nmcli dev wifi connect '%1' password '%2'").arg(ssid, pass);
     QProcess::startDetached("sh", QStringList() << "-c" << command);
 }
