@@ -37,17 +37,17 @@ void DBusReader::connectToWifi(const QString &username, const QString &password)
 
 
 void DBusReader::requestReboot() {
-    qDebug() << "UI: Reboot requested. Calling SystemController directly...";
+    qDebug() << "UI: Sending Reboot signal via systemctl...";
 
-    // المسار ده لازم يكون هو المسار الحقيقي لملف حسناء بعد ما تعمليله build
-    QString program = "/home/pi/our-project/Controller/build/SystemController";
+    QString program = "systemctl";
+    QStringList arguments;
+    arguments << "start" << "reboot-trigger.service";
 
-    // السطر ده هو اللي بيقوم ملف حسناء "يخطف" ريستارت ويقفل
-    bool success = QProcess::startDetached(program);
+    bool success = QProcess::startDetached(program, arguments);
 
     if (success) {
-        qDebug() << "UI: SystemController started successfully.";
+        qDebug() << "UI: Reboot signal sent to systemd.";
     } else {
-        qCritical() << "UI: Could not start SystemController. Check the path!";
+        qCritical() << "UI: Failed to trigger reboot-trigger.service.";
     }
 }
