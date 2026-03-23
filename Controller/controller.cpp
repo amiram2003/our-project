@@ -1,17 +1,12 @@
 #include "controller.h"
 #include <QDebug>
-#include <QtDBus/QDBusReply>
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusMessage>
 
 Controller::Controller(QObject *parent) : QObject(parent)
 {
-    /**
-     * Initialize the D-Bus interface for systemd-logind.
-     * Service: org.freedesktop.login1
-     * Path: /org/freedesktop/login1
-     * Interface: org.freedesktop.login1.Manager
-     * Bus: System Bus (Required for power management)
-     */
-    m_interface = new QDBusInterface(
+
+    m_systemdInterface = new QDBusInterface(
         "org.freedesktop.login1",
         "/org/freedesktop/login1",
         "org.freedesktop.login1.Manager",
@@ -21,26 +16,16 @@ Controller::Controller(QObject *parent) : QObject(parent)
 }
 
 Controller::~Controller() {
-    if (m_interface) {
-        delete m_interface;
-    }
+    delete m_systemdInterface;
 }
 
 void Controller::requestSystemReboot()
 {
-    if (m_interface && m_interface->isValid()) {
-        qDebug() << "Sending D-Bus Reboot signal...";
-        
-        /**
-         * Call the 'Reboot' method. 
-         * The 'true' parameter allows for interactive authorization if necessary.
-         */
-        QDBusMessage reply = m_interface->call("Reboot", true);
-        
-        if (reply.type() == QDBusMessage::ErrorMessage) {
-            qCritical() << "D-Bus Operation Failed:" << reply.errorMessage();
-        }
+    qDebug() << "Controller: Received Reboot request from UI via D-Bus...";
+    
+    if (m_systemdInterface && m_systemdInterface->isValid()) {
+        m_systemdInterface->call("Reboot", true);
     } else {
-        qCritical() << "Interface Invalid:" << m_interface->lastError().message();
+        qCritical() << "Controller: Cannot reach systemd-logind";
     }
 }

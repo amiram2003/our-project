@@ -17,11 +17,11 @@ public:
 public slots:
     void handleWifiIPChanged(const QString &newIp);
     void connectToWifi(const QString &username, const QString &password);
-
     void requestReboot();
 
 signals:
     void wifiIPChanged();
+
 private:
     QString m_wifiIP; 
 };

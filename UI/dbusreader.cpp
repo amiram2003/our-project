@@ -1,6 +1,7 @@
 #include "dbusreader.h"
 #include <QDebug>
-#include <QProcess>
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusMessage>
 
 DBusReader::DBusReader(QObject *parent) : QObject(parent) {
     QDBusConnection::sessionBus().connect(
@@ -12,7 +13,6 @@ DBusReader::DBusReader(QObject *parent) : QObject(parent) {
         SLOT(handleWifiIPChanged(QString))
     );
 }
-
 
 void DBusReader::handleWifiIPChanged(const QString &newIp) {
     if (m_wifiIP != newIp) {
@@ -30,24 +30,24 @@ void DBusReader::connectToWifi(const QString &username, const QString &password)
     );
 
     msg << username << password;
-
     QDBusConnection::sessionBus().send(msg);
 }
 
-
-
 void DBusReader::requestReboot() {
-    qDebug() << "UI: Sending Reboot signal via systemctl...";
+    qDebug() << "UI: Sending Reboot request to Controller via D-Bus...";
 
-    QString program = "systemctl";
-    QStringList arguments;
-    arguments << "start" << "reboot-trigger.service";
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+        "com.project.system",
+        "/Controller",
+        "com.project.system.Controller",
+        "requestSystemReboot"
+    );
 
-    bool success = QProcess::startDetached(program, arguments);
+    QDBusMessage reply = QDBusConnection::sessionBus().call(msg);
 
-    if (success) {
-        qDebug() << "UI: Reboot signal sent to systemd.";
+    if (reply.type() == QDBusMessage::ErrorMessage) {
+        qCritical() << "UI: D-Bus Error:" << reply.errorMessage();
     } else {
-        qCritical() << "UI: Failed to trigger reboot-trigger.service.";
+        qDebug() << "UI: Reboot request processed by Controller.";
     }
 }
