@@ -30,6 +30,10 @@ signals:
     void sigWifiIPChanged(const QString &newIp);
     void sigEthernetIPChanged(const QString &newIp); 
 
+
+private slots:
+    void onConnectionFinished();
+
 private:
     QString getInterfaceIP(const QString &interfaceName);
     QString m_ip;

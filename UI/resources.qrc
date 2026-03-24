@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>CustomKeyboard.qml</file>
         <file>icons/wifi_on.png</file>
         <file>icons/wifi_off.png</file>
         <file>icons/bluetooth_on.png</file>
@@ -8,5 +9,6 @@
         <file>icons/reboot.png</file>
         <file>icons/setting.png</file>
         <file>icons/lock.png</file>
+        <file>icons/button.png</file>
     </qresource>
 </RCC>

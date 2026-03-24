@@ -1,48 +1,31 @@
 #include "controller.h"
 #include <QDebug>
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusMessage>
 
 Controller::Controller(QObject *parent) : QObject(parent)
 {
-    m_interface = new QDBusInterface(
-        "com.raspberry.cloud",
-        "/",
-        "com.raspberry.network",
-        QDBusConnection::sessionBus(),
+
+    m_systemdInterface = new QDBusInterface(
+        "org.freedesktop.login1",
+        "/org/freedesktop/login1",
+        "org.freedesktop.login1.Manager",
+        QDBusConnection::systemBus(),
         this
     );
 }
 
 Controller::~Controller() {
-    if (m_interface) {
-        delete m_interface;
-        m_interface = nullptr;
-    }
+    delete m_systemdInterface;
 }
 
-QString Controller::getIpAddress()
+void Controller::requestSystemReboot()
 {
-    if (m_interface->isValid()) {
-        return m_interface->property("ipAddress").toString();
+    qDebug() << "Controller: Received Reboot request from UI via D-Bus...";
+    
+    if (m_systemdInterface && m_systemdInterface->isValid()) {
+        m_systemdInterface->call("Reboot", true);
+    } else {
+        qCritical() << "Controller: Cannot reach systemd-logind";
     }
-    return QString();
-}
-
-QString Controller::getMacAddress()
-{
-    if (m_interface->isValid()) {
-        return m_interface->property("macAddress").toString();
-    }
-    return QString();
-}
-
-void Controller::requestRestart()
-{
-    //< Is this really work ?! 
-    if (m_interface->isValid()) {
-        m_interface->call("requestRestart");
-    }
-}
-
-void connectToWifi(const QString& ssid, const QString& pass) {
-    //< To be implemented !!    
 }

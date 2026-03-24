@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QtDBus/QDBusMessage>
+#include <QtDBus/QDBusConnection>
 
 class DBusReader : public QObject {
     Q_OBJECT
@@ -14,12 +16,14 @@ public:
 
 public slots:
     void handleWifiIPChanged(const QString &newIp);
+    void connectToWifi(const QString &username, const QString &password);
+    void requestReboot();
 
 signals:
     void wifiIPChanged();
 
 private:
-    QString m_wifiIP = "Disconnected";
+    QString m_wifiIP; 
 };
 
 #endif
