@@ -20,10 +20,9 @@ int main(int argc, char *argv[])
     if (connection.interface()->isServiceRegistered("local.automotive.CloudService")) {
         qWarning() << "Service already running!";
     }
-
-    if (!connection.registerService("local.automotive.CloudService")) {
-        return 1;
-    }
+if (!connection.registerService("local.automotive.CloudService")) {
+    return 1;
+}
 
     if (!connection.registerObject("/", &cloud, QDBusConnection::ExportAllContents)) {
         return 1;

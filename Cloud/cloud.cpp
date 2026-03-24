@@ -2,6 +2,9 @@
 #include <QNetworkInterface>
 #include <QProcess>
 #include <QDebug>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 Cloud::Cloud(QObject *parent) : QObject(parent)
 {
@@ -21,7 +24,7 @@ QString Cloud::getInterfaceIP(const QString &interfaceName)
             }
         }
     }
-    return "";
+    return ""; // هنا بيرجع نص فاضي لو مفيش IP زي ما طلبتي
 }
 
 QString Cloud::getIP() {
@@ -73,4 +76,36 @@ void Cloud::connectToWifi(const QString& ssid, const QString& pass)
 {
     QString command = QString("sudo nmcli dev wifi connect '%1' password '%2'").arg(ssid, pass);
     QProcess::startDetached("sh", QStringList() << "-c" << command);
+}
+
+// --- الدوال الجديدة المضافة ---
+
+void Cloud::enableDisable(bool enable) {
+    QString state = enable ? "on" : "off";
+    QProcess::startDetached("nmcli", QStringList() << "radio" << "wifi" << state);
+}
+
+QString Cloud::getAvailableWifi() {
+    QProcess proc;
+    proc.start("nmcli", QStringList() << "-t" << "-f" << "SSID,SIGNAL,SECURITY" << "dev" << "wifi" << "list");
+    
+    if (!proc.waitForFinished()) return "[]";
+
+    QString output = QString::fromUtf8(proc.readAllStandardOutput());
+    QStringList lines = output.split('\n', Qt::SkipEmptyParts);
+
+    QJsonArray wifiList;
+    for (const QString &line : lines) {
+        QStringList parts = line.split(':'); 
+        if (parts.size() >= 2 && !parts[0].isEmpty()) {
+            QJsonObject wifiObj;
+            wifiObj["ssid"] = parts[0];
+            wifiObj["signal"] = parts[1];
+            wifiObj["security"] = (parts.size() > 2) ? parts[2] : "Open";
+            wifiList.append(wifiObj);
+        }
+    }
+
+    QJsonDocument doc(wifiList);
+    return QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
 }
