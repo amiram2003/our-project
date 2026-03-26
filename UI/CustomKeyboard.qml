@@ -5,25 +5,23 @@ import QtQuick.Layouts 1.15
 Rectangle {
     id: root
     
-    // Property to link the keyboard with the target TextField (SSID or Password)
     property var target: null 
     property bool isUpperCase: false
     property bool isArabic: false
     
     width: parent.width
-    height: parent.height * 0.5    // Keyboard takes 50% of screen height
-    color: "#333333"               // Dark background
-    visible: false                 // Hidden until a TextField is clicked
-    z: 100                         // Keeps the keyboard on top of other elements
+    height: parent.height * 0.5    
+    color: "#333333"               
+    visible: false                 
+    z: 100                         
 
     GridLayout {
         anchors.fill: parent
         anchors.margins: 5
-        columns: 10                // 10 buttons per row
+        columns: 10                
         rowSpacing: 5
         columnSpacing: 5
 
-        // Repeater creates buttons for all numbers and letters in the model
         Repeater {
             model: [
                 {en: "1", ar: "١"}, {en: "2", ar: "٢"}, {en: "3", ar: "٣"}, {en: "4", ar: "٤"}, {en: "5", ar: "٥"},
@@ -40,104 +38,92 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 
+                // --- CRITICAL FIX: Prevent button from stealing focus ---
+                focusPolicy: Qt.NoFocus 
+                
                 contentItem: Text {
                     text: root.isArabic ? modelData.ar : (root.isUpperCase ? modelData.en.toUpperCase() : modelData.en.toLowerCase())
-                    color: "black" // Changed to black for better visibility
+                    color: "black" 
                     font.pixelSize: 18
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
 
                 background: Rectangle {
-                    color: parent.pressed ? "#00eaff" : "#E0E0E0" // Light gray background
+                    color: parent.pressed ? "#00eaff" : "#E0E0E0" 
                     radius: 4
                 }
-                
-                onClicked: if (target) target.text += text
+        onClicked: {
+    if (root.target) {
+        // بنقرأ الحرف بناءً على اللغة وحالة الـ Shift زي ما انتِ معرفاهم فوق
+        let charToInsert = root.isArabic ? modelData.ar : (root.isUpperCase ? modelData.en.toUpperCase() : modelData.en.toLowerCase())
+        
+        root.target.insert(root.target.cursorPosition, charToInsert)
+        root.target.forceActiveFocus()
+    }
+}
             }
         }
 
-        // Shift Button with Arrow Icon
+        // Shift Button
         Button {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.columnSpan: 2
+            Layout.fillWidth: true; Layout.fillHeight: true; Layout.columnSpan: 2
+            focusPolicy: Qt.NoFocus // FIX
             contentItem: Text {
-                text: "⇧"
-                font.pixelSize: 24
+                text: "⇧"; font.pixelSize: 24
                 color: root.isUpperCase ? "#00eaff" : "black"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
             }
-            background: Rectangle {
-                color: parent.pressed ? "#00eaff" : "#E0E0E0"
-                radius: 4
+            background: Rectangle { color: parent.pressed ? "#00eaff" : "#E0E0E0"; radius: 4 }
+            onClicked: {
+                root.isUpperCase = !root.isUpperCase
+                if (target) target.forceActiveFocus()
             }
-            onClicked: root.isUpperCase = !root.isUpperCase
         }
 
-        // Language Button with Globe Icon
+        // Language Button
         Button {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.columnSpan: 2
+            Layout.fillWidth: true; Layout.fillHeight: true; Layout.columnSpan: 2
+            focusPolicy: Qt.NoFocus // FIX
             contentItem: Text {
-                text: "🌐"
-                font.pixelSize: 20
-                color: "black"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+                text: "🌐"; font.pixelSize: 20; color: "black"
+                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
             }
-            background: Rectangle {
-                color: parent.pressed ? "#00eaff" : "#E0E0E0"
-                radius: 4
+            background: Rectangle { color: parent.pressed ? "#00eaff" : "#E0E0E0"; radius: 4 }
+            onClicked: {
+                root.isArabic = !root.isArabic
+                if (target) target.forceActiveFocus()
             }
-            onClicked: root.isArabic = !root.isArabic
         }
 
         // Backspace Button
         Button {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.columnSpan: 2
+            Layout.fillWidth: true; Layout.fillHeight: true; Layout.columnSpan: 2
+            focusPolicy: Qt.NoFocus // FIX
             contentItem: Text {
-                text: "⌫"
-                font.pixelSize: 20
-                color: "black"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+                text: "⌫"; font.pixelSize: 20; color: "black"
+                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
             }
-            background: Rectangle {
-                color: parent.pressed ? "#ff4444" : "#E0E0E0"
-                radius: 4
+            background: Rectangle { color: parent.pressed ? "#ff4444" : "#E0E0E0"; radius: 4 }
+           onClicked: {
+            if (target && target.cursorPosition > 0) {
+             target.remove(target.cursorPosition - 1, target.cursorPosition)
+             target.forceActiveFocus()
             }
-            onClicked: {
-                if (target && target.text.length > 0)
-                    target.text = target.text.substring(0, target.text.length - 1)
-            }
+       }
         }
 
         // Done Button
         Button {
             text: "DONE"
+            Layout.fillWidth: true; Layout.fillHeight: true; Layout.columnSpan: 4
+            focusPolicy: Qt.NoFocus // FIX
             font.bold: true
-            highlighted: true
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.columnSpan: 4
-            
             contentItem: Text {
-                text: parent.text
-                font: parent.font
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+                text: parent.text; font: parent.font; color: "white"
+                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
             }
-            
-            background: Rectangle {
-                color: parent.pressed ? "#0088cc" : "#00eaff"
-                radius: 4
-            }
+            background: Rectangle { color: parent.pressed ? "#0088cc" : "#00eaff"; radius: 4 }
             onClicked: root.visible = false
         }
     }

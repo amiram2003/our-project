@@ -1,3 +1,4 @@
+#include <QTimer>
 #include "cloud.h"
 #include <QNetworkInterface>
 #include <QProcess>
@@ -29,10 +30,10 @@ QString Cloud::getInterfaceIP(const QString &interfaceName)
 
 QString Cloud::getIP() {
     QString currentIp = getInterfaceIP("wlan");
-    if (currentIp != m_ip) {
+      if (currentIp != m_ip) {
         m_ip = currentIp;
         emit sigWifiIPChanged(m_ip);
-    }
+       } 
     return m_ip;
 }
 
@@ -74,8 +75,15 @@ double Cloud::getFrequencyBands()
 
 void Cloud::connectToWifi(const QString& ssid, const QString& pass)
 {
+    QProcess::execute("nmcli connection delete \"" + ssid + "\"");
     QString command = QString("sudo nmcli dev wifi connect '%1' password '%2'").arg(ssid, pass);
     QProcess::startDetached("sh", QStringList() << "-c" << command);
+}
+
+void Cloud::onConnectionFinished()
+{
+    this->getIP();
+    sender()->deleteLater();
 }
 
 // --- الدوال الجديدة المضافة ---
@@ -87,7 +95,7 @@ void Cloud::enableDisable(bool enable) {
 
 QString Cloud::getAvailableWifi() {
     QProcess proc;
-    proc.start("nmcli", QStringList() << "-t" << "-f" << "SSID,SIGNAL,SECURITY" << "dev" << "wifi" << "list");
+    proc.start("nmcli", QStringList() << "-t" << "-f" << "SSID,SIGNAL,SECURITY" << "dev" << "wifi" << "list" << "--rescan" << "yes");
     
     if (!proc.waitForFinished()) return "[]";
 
@@ -97,7 +105,9 @@ QString Cloud::getAvailableWifi() {
     QJsonArray wifiList;
     for (const QString &line : lines) {
         QStringList parts = line.split(':'); 
-        if (parts.size() >= 2 && !parts[0].isEmpty()) {
+        if (parts.size() >= 2) {
+            if (parts[0].isEmpty()) continue; 
+            
             QJsonObject wifiObj;
             wifiObj["ssid"] = parts[0];
             wifiObj["signal"] = parts[1];

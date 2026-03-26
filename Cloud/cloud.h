@@ -21,8 +21,6 @@ public slots:
     QString getMacAddress();
     double getFrequencyBands();    
     void connectToWifi(const QString& ssid, const QString& pass);
-    
-    
     QString getAvailableWifi(); 
     void enableDisable(bool enable); 
 

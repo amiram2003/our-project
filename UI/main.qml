@@ -52,7 +52,10 @@ Window {
                     source: "qrc:/icons/button.png"
                     fillMode: Image.PreserveAspectFit
                 }
-                onClicked: wifiPopup.open() 
+                onClicked: {
+                    dbusData.scanAvailableWifi()
+                    wifiPopup.open()
+                }
             }
 
             // Bluetooth Status Icon
@@ -72,20 +75,14 @@ Window {
             model: 40 
             Rectangle {
                 id: tick
-                width: 8
-                height: 25
-                radius: 2
+                width: 8; height: 25; radius: 2
                 color: index * (root.maxSpeed / 40) <= root.speed ? "#00eaff" : "#1A3A4A"
                 anchors.centerIn: parent
                 antialiasing: true
                 opacity: index * (root.maxSpeed / 40) <= root.speed ? 1.0 : 0.3
 
                 transform: [
-                    Rotation { 
-                        angle: (index * 6.75) - 135
-                        origin.x: 4
-                        origin.y: 150 
-                    },
+                    Rotation { angle: (index * 6.75) - 135; origin.x: 4; origin.y: 150 },
                     Translate { y: -140 }
                 ]
             }
@@ -118,15 +115,15 @@ Window {
                     spacing: 5
                     Image { 
                         source: "qrc:/icons/reboot.png"
-                        width: 35; height: 35; 
-                        fillMode: Image.PreserveAspectFit; 
+                        width: 35; height: 35 
+                        fillMode: Image.PreserveAspectFit 
                         anchors.horizontalCenter: parent.horizontalCenter 
                     }
                     Text { 
                         text: "REBOOT"
-                        color: "#FF4444"; 
-                        font.pixelSize: 10; 
-                        font.bold: true; 
+                        color: "#FF4444" 
+                        font.pixelSize: 10 
+                        font.bold: true 
                         anchors.horizontalCenter: parent.horizontalCenter 
                     }
                 }
@@ -166,56 +163,72 @@ Window {
     // --- WIFI CREDENTIALS POPUP ---
     Popup {
         id: wifiPopup
-        width: 420; height: 440 
-        modal: true
-        focus: true
+        width: 440; height: 460 
+        modal: true; focus: true
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         
         background: Rectangle {
-            color: "#0A1F29"
-            radius: 10
-            border.color: "#00eaff"
+            color: "#0A1F29"; radius: 10; border.color: "#00eaff"
         }
 
         Column {
             id: popupContent
-            width: parent.width - 20
-            anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 20
-            spacing: 12
+            width: parent.width - 40
+            anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 15 }
+            spacing: 10
 
-            TextField {
-                id: wifiUser
-                width: parent.width
-                placeholderText: "SSID (User)"
-                color: "white"
-                background: Rectangle { color: "#1A3A4A"; radius: 4 }
-                onPressed: {
-                    myKeyboard.target = wifiUser
-                    myKeyboard.visible = true
+            Row {
+                spacing: 10; anchors.horizontalCenter: parent.horizontalCenter
+                Text { text: "Enable WiFi"; color: "white"; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+                Switch { 
+                    focusPolicy: Qt.NoFocus
+                    onToggled: dbusData.enableDisableWifi(checked) 
                 }
             }
 
             TextField {
+                id: wifiUser
+                width: parent.width; placeholderText: "Selected SSID"; color: "#00eaff"; readOnly: true 
+                background: Rectangle { color: "#1A3A4A"; radius: 4; border.color: "#00eaff" }
+            }
+
+            TextField {
                 id: wifiPass
-                width: parent.width
-                placeholderText: "Password"
-                echoMode: TextInput.Password
-                color: "white"
-                background: Rectangle { color: "#1A3A4A"; radius: 4 }
+                width: parent.width; placeholderText: "Password"; echoMode: TextInput.Password; color: "white"
+                background: Rectangle { color: "#1A3A4A"; radius: 4; border.color: activeFocus ? "#00eaff" : "transparent" }
                 onPressed: {
+                    wifiPass.forceActiveFocus()
                     myKeyboard.target = wifiPass
                     myKeyboard.visible = true
                 }
             }
 
+            // Available Networks (Black text / White background)
+            Rectangle {
+                width: parent.width; height: 80; color: "white"; radius: 4; clip: true
+                ListView {
+                    id: wifiList; anchors.fill: parent; model: dbusData.wifiList
+                    focus: false
+                    delegate: ItemDelegate {
+                        width: wifiList.width; height: 30
+                        focusPolicy: Qt.NoFocus
+                        contentItem: Text { 
+                            text: "📶 " + modelData.ssid
+                            color: "black"; font.bold: true; verticalAlignment: Text.AlignVCenter 
+                        }
+                        onClicked: {
+                            wifiUser.text = modelData.ssid
+                            wifiPass.forceActiveFocus()
+                        }
+                    }
+                }
+            }
+
             Button {
                 id: connectBtn
-                text: "CONNECT"
-                width: parent.width
-                height: 40
+                text: "CONNECT"; width: parent.width; height: 35
+                focusPolicy: Qt.NoFocus
                 contentItem: Text { text: parent.text; color: "white"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.bold: true }
                 background: Rectangle { color: "#00eaff"; radius: 4 }
                 onClicked: {
@@ -228,14 +241,12 @@ Window {
 
         CustomKeyboard {
             id: myKeyboard
-            width: parent.width - 20
-            height: 200
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 15
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: false 
+            width: parent.width - 20; height: 160
+            anchors { bottom: parent.bottom; bottomMargin: 5; horizontalCenter: parent.horizontalCenter }
+            visible: false
+            z: 100 
         }
     }
-     // Smooth animation for speedometer changes
+
     Behavior on speed { NumberAnimation { duration: 800; easing.type: Easing.OutCubic } }
 }
