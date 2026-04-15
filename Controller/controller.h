@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusContext>
+#include <QSocketNotifier> // مكتبة مراقبة الـ Sockets
 
 class Controller : public QObject, protected QDBusContext
 {
@@ -14,12 +15,17 @@ class Controller : public QObject, protected QDBusContext
 public:
     explicit Controller(QObject *parent = nullptr);
     ~Controller();
+    bool setupCanInterface(const QString &ifaceName);
 
 public slots:  
     void requestSystemReboot();
+private slots:
+    void readCanFrame(); // الفانكشن اللي هتقرأ من vcan0
 
 private:
     QDBusInterface *m_systemdInterface;
+    int m_canSocket;
+    QSocketNotifier *m_canNotifier;
 };
 
 #endif

@@ -249,4 +249,65 @@ Window {
     }
 
     Behavior on speed { NumberAnimation { duration: 800; easing.type: Easing.OutCubic } }
+    // --- AUTHENTICATION & SECURITY OVERLAY (NEW PART) ---
+    Timer {
+        id: authTimer
+        interval: 5000 
+        repeat: false
+        onTriggered: {
+            dbusData.authStatus = "" 
+        }
+    }
+
+    Connections {
+        target: dbusData
+        function onAuthStatusChanged() {
+            if (dbusData.authStatus !== "") {
+                authTimer.restart()
+            }
+        }
+    }
+
+    Rectangle {
+        id: authOverlay
+        width: 400; height: 350
+        anchors.centerIn: parent
+        color: "#0A1F29"; radius: 15
+        border.color: dbusData.authStatus.includes("Welcome") ? "#00FF00" : "#FF4444"
+        border.width: 2
+        visible: dbusData.authStatus !== "" 
+        z: 200 
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 15
+            horizontalAlignment: Text.AlignHCenter
+
+            Text {
+                text: dbusData.authStatus.includes("Welcome") ? "🔓" : "🚨"
+                font.pixelSize: 40
+            }
+
+            Text {
+                text: dbusData.authStatus
+                color: "white"
+                font.pixelSize: 22; font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                width: 350; wrapMode: Text.WordWrap
+            }
+
+            Image {
+                id: intruderImg
+                width: 280; height: 180
+                fillMode: Image.PreserveAspectFit
+                cache: false 
+                source: dbusData.intruderImagePath !== "" ? dbusData.intruderImagePath : ""
+                visible: dbusData.authStatus.includes("Welcome") && dbusData.intruderImagePath !== ""
+                
+                Rectangle {
+                    anchors.fill: parent; color: "transparent"; border.color: "#1A3A4A"; border.width: 1
+                }
+            }
+        }
+    }
 }

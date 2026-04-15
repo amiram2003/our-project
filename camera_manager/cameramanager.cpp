@@ -6,12 +6,10 @@ CameraManager::CameraManager(QObject *parent) : QObject(parent)
 {
 }
 
-void CameraManager::onFingerprintReceived(int status)
+void CameraManager::onCaptureRequested()
 {
-    if (status == 0) {
-        qDebug() << "CameraManager: Unauthorized access! Capturing...";
-        capture();
-    }
+    qDebug() << "CameraManager: Received CaptureIntruder signal! Taking photo...";
+    capture();
 }
 
 void CameraManager::capture()
@@ -25,8 +23,9 @@ void CameraManager::capture()
     cv::Mat frame;
     cap >> frame;
     if (!frame.empty()) {
+        // بنسيف الصورة في مكان ثابت عشان الـ UI يقدر يقرأها ويعرضها بعدين
         cv::imwrite("/tmp/intruder.jpg", frame);
-        qDebug() << "CameraManager: Image saved to /tmp/intruder.jpg";
+        qDebug() << "CameraManager: Intruder image captured and saved to /tmp/intruder.jpg";
     }
     cap.release();
 }

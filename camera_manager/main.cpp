@@ -15,13 +15,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    bool connected = bus.connect("", "/", "com.automotive.system", "FingerprintStatus",
-                                 &manager, SLOT(onFingerprintReceived(int)));
+    bool connected = bus.connect("", "/", "com.automotive.system", "CaptureIntruder",
+                                  &manager, SLOT(onCaptureRequested()));
 
     if (!connected) {
-        qCritical() << "CameraManager: Failed to connect to D-Bus signal";
+        qCritical() << "CameraManager: Failed to connect to 'CaptureIntruder' signal";
     }
 
-    qDebug() << "Camera Service is running and listening for signals...";
+    qDebug() << "Camera Service is ready. Waiting for CaptureIntruder signals...";
     return app.exec();
 }

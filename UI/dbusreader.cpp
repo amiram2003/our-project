@@ -12,6 +12,14 @@ DBusReader::DBusReader(QObject *parent) : QObject(parent) {
         this,
         SLOT(handleWifiIPChanged(QString))
     );
+        QDBusConnection::sessionBus().connect(
+        "com.project.system",
+        "/Controller",
+        "com.project.system.Controller",
+        "FingerprintUpdate",
+        this,
+        SLOT(handleFingerprintUpdate(int))
+    );
 }
 
 void DBusReader::handleWifiIPChanged(const QString &newIp) {
@@ -97,4 +105,37 @@ void DBusReader::requestReboot() {
     } else {
         qDebug() << "UI: Reboot request processed by Controller.";
     }
+}
+
+void DBusReader::handleFingerprintUpdate(int status) {
+    if (status == 1) {
+        qDebug() << "DBusReader: Access Granted! Notifying AI and UI...";
+        m_authStatus = "Welcome, Authorized Driver!";
+        
+        // نحدد مسار الصورة (بنستخدم file:// عشان QML يعرف يقرأ من الـ System)
+        m_intruderImagePath = "file:///tmp/intruder.jpg"; 
+        
+        // إشارة للـ AI
+        QDBusMessage aiMsg = QDBusMessage::createSignal("/", "com.automotive.system", "StartAI");
+        aiMsg << true;
+        QDBusConnection::sessionBus().send(aiMsg);
+    } 
+    else {
+        qDebug() << "DBusReader: Access Denied! Capturing Intruder...";
+        m_authStatus = "Unauthorized Access Attempt!";
+        
+        // في حالة الفشل ممكن نصفر المسار أو نسيب القديم لو حابين
+        m_intruderImagePath = ""; 
+
+        // إشارة للكاميرا
+        QDBusMessage camMsg = QDBusMessage::createSignal("/", "com.automotive.system", "CaptureIntruder");
+        QDBusConnection::sessionBus().send(camMsg);
+        
+        QDBusMessage aiMsg = QDBusMessage::createSignal("/", "com.automotive.system", "StartAI");
+        aiMsg << false;
+        QDBusConnection::sessionBus().send(aiMsg);
+    }
+    
+    emit authStatusChanged();
+    emit intruderImagePathChanged(); // لازم نبعت السيجنال دي عشان الـ UI يتحدث
 }

@@ -9,6 +9,9 @@ int main(int argc, char *argv[])
 
     Controller controller;
 
+    if (!controller.setupCanInterface("vcan0")) {
+        qCritical() << "Controller: Failed to setup CAN interface (vcan0)!";
+
     QDBusConnection bus = QDBusConnection::sessionBus();
     
     if (!bus.registerService("com.project.system")) {
@@ -16,11 +19,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (!bus.registerObject("/Controller", &controller, QDBusConnection::ExportAllSlots)) {
+    if (!bus.registerObject("/Controller", &controller, QDBusConnection::ExportAllSlots | QDBusConnection::ExportAllSignals)) {
         qCritical() << "Failed to register D-Bus object:" << bus.lastError().message();
         return 1;
     }
 
     qDebug() << "Controller Service is running and waiting for UI signals...";
+    qDebug() << "Monitoring vcan0 for Fingerprint and D-Bus for UI commands.";
     return app.exec(); 
+}
 }

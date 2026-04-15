@@ -11,7 +11,8 @@ public:
     explicit CameraManager(QObject *parent = nullptr);
 
 public slots:
-    void onFingerprintReceived(int status);
+    // السلوت ده هيتنفذ أول ما الـ Reader يبعت CaptureIntruder
+    void onCaptureRequested();
 
 private:
     void capture();
