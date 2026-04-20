@@ -11,16 +11,17 @@
 class CarControl {
 public:
     static void init(uint32_t baud);
-    
-    // Movement methods
+    static void setSpeed(uint8_t speed);
     static void moveForward();
     static void moveBackward();
     static void turnRight();
     static void turnLeft();
     static void stop();
-
-    // Process commands received via Interrupt
     static void processCommand(char cmd);
+    
+    // عدادات منفصلة لكل موتور
+    static volatile long pulseCountRight;
+    static volatile long pulseCountLeft;
 };
 
 #endif

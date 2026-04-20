@@ -7,7 +7,8 @@ project(Car_Controller)
 
 set(MCU atmega32)
 set(F_CPU 16000000UL)
-set(BAUD 9600)
+
+include_directories(.)
 
 set(CMAKE_C_COMPILER avr-gcc)
 set(CMAKE_CXX_COMPILER avr-g++)
