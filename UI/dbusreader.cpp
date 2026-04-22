@@ -116,7 +116,7 @@ void DBusReader::handleFingerprintUpdate(int status) {
         m_intruderImagePath = "file:///tmp/intruder.jpg"; 
         
         // إشارة للـ AI
-        QDBusMessage aiMsg = QDBusMessage::createSignal("/", "com.automotive.system", "StartAI");
+        QDBusMessage aiMsg = QDBusMessage::createSignal("/Controller", "com.project.system.Controller", "StartAI");
         aiMsg << true;
         QDBusConnection::sessionBus().send(aiMsg);
     } 
@@ -127,11 +127,7 @@ void DBusReader::handleFingerprintUpdate(int status) {
         // في حالة الفشل ممكن نصفر المسار أو نسيب القديم لو حابين
         m_intruderImagePath = ""; 
 
-        // إشارة للكاميرا
-        QDBusMessage camMsg = QDBusMessage::createSignal("/", "com.automotive.system", "CaptureIntruder");
-        QDBusConnection::sessionBus().send(camMsg);
-        
-        QDBusMessage aiMsg = QDBusMessage::createSignal("/", "com.automotive.system", "StartAI");
+        QDBusMessage aiMsg = QDBusMessage::createSignal("/Controller", "com.project.system", "StartAI");
         aiMsg << false;
         QDBusConnection::sessionBus().send(aiMsg);
     }

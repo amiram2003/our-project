@@ -15,8 +15,14 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    bool connected = bus.connect("", "/", "com.automotive.system", "CaptureIntruder",
-                                  &manager, SLOT(onCaptureRequested()));
+   bool connected = bus.connect(
+    "com.project.system",             // 1. Service Name
+    "/Controller",                    // 2. Object Path
+    "com.project.system.Controller",  // 3. Interface Name
+    "CaptureIntruder",                // 4. Signal Name
+    &manager, 
+    SLOT(onCaptureRequested())
+);
 
     if (!connected) {
         qCritical() << "CameraManager: Failed to connect to 'CaptureIntruder' signal";

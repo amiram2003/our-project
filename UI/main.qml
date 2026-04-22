@@ -254,8 +254,8 @@ Window {
         id: authTimer
         interval: 5000 
         repeat: false
-        onTriggered: {
-            dbusData.authStatus = "" 
+       onTriggered: {
+            authOverlay.visible = false 
         }
     }
 
@@ -263,6 +263,7 @@ Window {
         target: dbusData
         function onAuthStatusChanged() {
             if (dbusData.authStatus !== "") {
+                authOverlay.visible = true
                 authTimer.restart()
             }
         }
@@ -275,20 +276,21 @@ Window {
         color: "#0A1F29"; radius: 15
         border.color: dbusData.authStatus.includes("Welcome") ? "#00FF00" : "#FF4444"
         border.width: 2
-        visible: dbusData.authStatus !== "" 
+        visible: false
         z: 200 
 
         Column {
             anchors.centerIn: parent
             spacing: 15
-            horizontalAlignment: Text.AlignHCenter
 
             Text {
+                anchors.horizontalCenter: parent.horizontalCenter
                 text: dbusData.authStatus.includes("Welcome") ? "🔓" : "🚨"
                 font.pixelSize: 40
             }
 
             Text {
+                anchors.horizontalCenter: parent.horizontalCenter
                 text: dbusData.authStatus
                 color: "white"
                 font.pixelSize: 22; font.bold: true

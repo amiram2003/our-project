@@ -21,6 +21,9 @@ public slots:
     void requestSystemReboot();
 private slots:
     void readCanFrame(); // الفانكشن اللي هتقرأ من vcan0
+signals:
+    void CaptureIntruder(); 
+    void FingerprintUpdate(int status);
 
 private:
     QDBusInterface *m_systemdInterface;
