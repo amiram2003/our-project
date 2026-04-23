@@ -303,7 +303,11 @@ Window {
                 width: 280; height: 180
                 fillMode: Image.PreserveAspectFit
                 cache: false 
-                source: dbusData.intruderImagePath !== "" ? dbusData.intruderImagePath : ""
+               source: dbusData.intruderImagePath !== "" ? dbusData.intruderImagePath + "?t=" + new Date().getTime() : ""
+               onStatusChanged: {
+        if (status === Image.Ready) console.log("Image loaded successfully!")
+        if (status === Image.Error) console.log("Image load error: " + source)
+    }
                 visible: dbusData.authStatus.includes("Welcome") && dbusData.intruderImagePath !== ""
                 
                 Rectangle {

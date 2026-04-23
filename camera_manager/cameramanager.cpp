@@ -14,7 +14,7 @@ void CameraManager::onCaptureRequested()
 
 void CameraManager::capture()
 {
-    cv::VideoCapture cap(0);
+    cv::VideoCapture cap(0, cv::CAP_V4L2);
     if (!cap.isOpened()) {
         qCritical() << "CameraManager: Could not open camera!";
         return;
