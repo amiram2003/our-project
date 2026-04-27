@@ -143,7 +143,7 @@ Window {
         color: "#0A1F29"; radius: 12; border.color: "#1A3A4A"
         Column {
             anchors.centerIn: parent; spacing: 35
-            Column { spacing: 5; anchors.horizontalCenter: parent.horizontalCenter; Text { text: "🌡️ 24°C"; color: "white"; font.pixelSize: 18 } Text { text: "TEMP"; color: "#888"; font.pixelSize: 9; font.bold: true } }
+            Column { spacing: 5; anchors.horizontalCenter: parent.horizontalCenter; Text { text: "🌡️ 25°C"; color: "white"; font.pixelSize: 18 } Text { text: "TEMP"; color: "#888"; font.pixelSize: 9; font.bold: true } }
             Column { spacing: 5; anchors.horizontalCenter: parent.horizontalCenter; Text { text: "📶 LTE"; color: "#00eaff"; font.pixelSize: 16 } Text { text: "NETWORK"; color: "#888"; font.pixelSize: 9; font.bold: true } }
         }
     }

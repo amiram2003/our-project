@@ -1,6 +1,7 @@
 #include "cameramanager.h"
 #include <QDebug>
 #include <opencv2/opencv.hpp>
+#include <QFile>
 
 CameraManager::CameraManager(QObject *parent) : QObject(parent)
 {
@@ -12,20 +13,21 @@ void CameraManager::onCaptureRequested()
     capture();
 }
 
-void CameraManager::capture()
-{
-    cv::VideoCapture cap(0, cv::CAP_V4L2);
-    if (!cap.isOpened()) {
-        qCritical() << "CameraManager: Could not open camera!";
-        return;
-    }
+void CameraManager::capture() {
+    qDebug() << "CameraManager: Capture triggered...";
 
-    cv::Mat frame;
-    cap >> frame;
-    if (!frame.empty()) {
-        // بنسيف الصورة في مكان ثابت عشان الـ UI يقدر يقرأها ويعرضها بعدين
-        cv::imwrite("/tmp/intruder.jpg", frame);
-        qDebug() << "CameraManager: Intruder image captured and saved to /tmp/intruder.jpg";
+    QString cmd = "rpicam-still -t 100 -o /tmp/intruder.jpg --width 640 --height 480 --immediate";
+    
+    int result = system(cmd.toStdString().c_str());
+
+    if (result == 0) {
+        QFile file("/tmp/intruder.jpg");
+        if (file.exists() && file.size() > 0) {
+            qDebug() << "✅ Photo saved to /tmp/intruder.jpg";
+        } else {
+            qCritical() << "❌ File not created or empty!";
+        }
+    } else {
+        qCritical() << "❌ Command execution failed!";
     }
-    cap.release();
 }

@@ -114,7 +114,7 @@ void DBusReader::handleFingerprintUpdate(int status) {
         
         // نحدد مسار الصورة (بنستخدم file:// عشان QML يعرف يقرأ من الـ System)
         m_intruderImagePath = "file:///tmp/intruder.jpg"; 
-        
+       
         // إشارة للـ AI
         QDBusMessage aiMsg = QDBusMessage::createSignal("/Controller", "com.project.system.Controller", "StartAI");
         aiMsg << true;
