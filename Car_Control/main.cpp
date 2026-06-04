@@ -2,6 +2,7 @@
 
 ISR(USART_RXC_vect) {
     char receivedChar = UDR;
+    PORTC ^= (1 << PC0);
     CarControl::processCommand(receivedChar);
 }
 

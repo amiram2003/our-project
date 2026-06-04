@@ -8,8 +8,8 @@ void CarControl::init(uint32_t baud) {
     uint16_t ubrr = F_CPU/16/baud - 1;
     UBRRH = (ubrr >> 8);
     UBRRL = ubrr;
-    UCSRB = (1 << RXEN) | (1 << TXEN) | (1 << RXCIE);
     UCSRC = (1 << URSEL) | (1 << UCSZ1) | (1 << UCSZ0);
+    UCSRB = (1 << RXEN) | (1 << TXEN) | (1 << RXCIE);
 
     // Motor Pins on Port B (PB1, PB2, PB3, PB4)
     DDRB |= (1 << PB1) | (1 << PB2) | (1 << PB3) | (1 << PB4);
@@ -28,6 +28,9 @@ void CarControl::init(uint32_t baud) {
     // External Interrupts (INT0 & INT1)
     GICR |= (1 << INT0) | (1 << INT1);
     MCUCR |= (1 << ISC01) | (1 << ISC00) | (1 << ISC11) | (1 << ISC10); // Rising Edge
+    DDRC |= (1 << PC0);
+    PORTC &= ~(1 << PC0);
+   
 
     sei();
 }
