@@ -1,5 +1,7 @@
 #include "controller.h"
+#include <cmath>
 #include <QDebug>
+#include <QDateTime>
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusMessage>
 
@@ -25,6 +27,10 @@ Controller::Controller(QObject *parent) : QObject(parent), m_canSocket(-1), m_ca
     );
       // بنفتح الـ vcan0 أول ما الكنترولر يبدأ
       setupCanInterface("vcan0");
+
+      m_gps = new GPSManager(this);
+      m_gps->openPort("serial0"); 
+      connect(m_gps, &GPSManager::locationUpdated, this, &Controller::onLocationUpdated);
 }
 
 Controller::~Controller() {
@@ -83,8 +89,27 @@ void Controller::readCanFrame()
                 QDBusConnection::sessionBus().send(cameraMsg);
             }
         }
+
+            else if (frame.can_id == 0x456) {
+                 qDebug() << "New Pothole Detected! Logging to SD Card...";
+
+                 QFile file("potholes_log.csv");
+                 if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+                      QTextStream stream(&file);
+                 if (file.size() == 0) {
+                      stream << "Timestamp,Latitude,Longitude\n";
+                 }
+                 QString currentTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+                  stream << currentTime << "," 
+                  << QString::number(m_currentLat, 'f', 6) << "," 
+                  << QString::number(m_currentLon, 'f', 6) << "\n";
+                file.close();
+                qDebug() << "Logged successfully.";
+            }
+        }
     }
 }
+
 
 void Controller::requestSystemReboot()
 {
@@ -95,4 +120,60 @@ void Controller::requestSystemReboot()
     } else {
         qCritical() << "Controller: Cannot reach systemd-logind";
     }
+}
+
+void Controller::onLocationUpdated(double lat, double lon)
+{
+    m_currentLat = lat;
+    m_currentLon = lon;
+
+    
+    QDBusMessage gpsMsg = QDBusMessage::createSignal("/Controller", "com.project.system.Controller", "GPSLocationChanged");
+    gpsMsg << lat << lon;
+    QDBusConnection::sessionBus().send(gpsMsg);
+
+    // 2. ثانياً: مقارنة الموقع الحالي بالمطبات المخزنة
+    QFile file("potholes_log.csv");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&file);
+        QString header = stream.readLine(); // تخطي السطر الأول (العناوين)
+
+        while (!stream.atEnd()) {
+            QString line = stream.readLine();
+            QStringList fields = line.split(",");
+            if (fields.size() >= 3) {
+                double savedLat = fields[1].toDouble();
+                double savedLon = fields[2].toDouble();
+
+                // حساب المسافة بالمتر
+                double distance = calculateDistance(m_currentLat, m_currentLon, savedLat, savedLon);
+
+                // لو المسافة أقل من أو تساوي 50 متر
+                if (distance <= 50.0) {
+                    qDebug() << "Warning! Saved pothole is close! Distance:" << distance << "meters";
+
+                    QDBusMessage warningMsg = QDBusMessage::createSignal("/Controller", "com.project.system.Controller", "PotholeAlert");
+                    warningMsg << distance; 
+                    QDBusConnection::sessionBus().send(warningMsg);
+                    
+                    break; // إيقاف اللوب لمنع تكرار التنبيه في نفس اللحظة
+                }
+            }
+        }
+        file.close();
+    }
+}
+
+double Controller::calculateDistance(double lat1, double lon1, double lat2, double lon2)
+{
+    double r = 6371000; // نصف قطر الأرض بالمتر
+    double dLat = (lat2 - lat1) * M_PI / 180.0;
+    double dLon = (lon2 - lon1) * M_PI / 180.0;
+    
+    double a = std::sin(dLat / 2) * std::sin(dLat / 2) +
+               std::cos(lat1 * M_PI / 180.0) * std::cos(lat2 * M_PI / 180.0) *
+               std::sin(dLon / 2) * std::sin(dLon / 2);
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+    
+    return r * c;
 }

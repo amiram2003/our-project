@@ -20,6 +20,22 @@ DBusReader::DBusReader(QObject *parent) : QObject(parent) {
         this,
         SLOT(handleFingerprintUpdate(int))
     );
+        QDBusConnection::sessionBus().connect(
+        "com.project.system",
+        "/Controller",
+        "com.project.system.Controller",
+        "PotholeAlert",
+        this,
+        SLOT(handlePotholeAlert(double))
+    );
+        QDBusConnection::sessionBus().connect(
+        "com.project.system",
+        "/Controller",
+        "com.project.system.Controller",
+        "GPSLocationChanged",
+        this,
+        SLOT(handleGpsLocationChanged(double, double))
+    );
 }
 
 void DBusReader::handleWifiIPChanged(const QString &newIp) {
@@ -134,4 +150,15 @@ void DBusReader::handleFingerprintUpdate(int status) {
     
     emit authStatusChanged();
     emit intruderImagePathChanged(); // لازم نبعت السيجنال دي عشان الـ UI يتحدث
+}
+
+void DBusReader::handleGpsLocationChanged(double lat, double lon) {
+    m_gpsCoordinates = QString("Lat: %1\nLon: %2").arg(lat, 0, 'f', 6).arg(lon, 0, 'f', 6);
+    emit gpsCoordinatesChanged();
+}
+
+void DBusReader::handlePotholeAlert(double distance) {
+    m_potholeDistance = distance;
+    emit potholeDistanceChanged();
+    qDebug() << "DBusReader: Alert UI! Saved pothole ahead in:" << distance << "meters";
 }

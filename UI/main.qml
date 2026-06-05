@@ -143,20 +143,49 @@ Window {
         color: "#0A1F29"; radius: 12; border.color: "#1A3A4A"
         Column {
             anchors.centerIn: parent; spacing: 35
-            Column { spacing: 5; anchors.horizontalCenter: parent.horizontalCenter; Text { text: "🌡️ 25°C"; color: "white"; font.pixelSize: 18 } Text { text: "TEMP"; color: "#888"; font.pixelSize: 9; font.bold: true } }
+            Column { spacing: 5; anchors.horizontalCenter: parent.horizontalCenter; Text { text: "🌡️ 24°C"; color: "white"; font.pixelSize: 18 } Text { text: "TEMP"; color: "#888"; font.pixelSize: 9; font.bold: true } }
             Column { spacing: 5; anchors.horizontalCenter: parent.horizontalCenter; Text { text: "📶 LTE"; color: "#00eaff"; font.pixelSize: 16 } Text { text: "NETWORK"; color: "#888"; font.pixelSize: 9; font.bold: true } }
         }
     }
 
     // --- RIGHT INFORMATION PANEL (Settings & Battery) ---
-    Rectangle {
+   Rectangle {
+
         width: 130; height: 220
         anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 50 }
         color: "#0A1F29"; radius: 12; border.color: "#1A3A4A"
+        
         Column {
-            anchors.centerIn: parent; spacing: 35
-            Column { spacing: 5; anchors.horizontalCenter: parent.horizontalCenter; Image { source: "qrc:/icons/setting.png"; width: 30; height: 30; fillMode: Image.PreserveAspectFit } Text { text: "SETTING"; color: "#00eaff"; font.pixelSize: 9; font.bold: true } }
-            Column { spacing: 5; anchors.horizontalCenter: parent.horizontalCenter; Text { text: "🔋 92%"; color: "#00FF00"; font.pixelSize: 18; font.bold: true } Text { text: "BATTERY"; color: "#888"; font.pixelSize: 9; font.bold: true } }
+            anchors.centerIn: parent; spacing: 12 
+            // 1.SETTIN
+            Column { 
+                spacing: 5; anchors.horizontalCenter: parent.horizontalCenter
+                Image { source: "qrc:/icons/setting.png"; width: 30; height: 30; fillMode: Image.PreserveAspectFit } 
+                Text { text: "SETTING"; color: "#00eaff"; font.pixelSize: 9; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } 
+            }
+            
+            // 2. GPS ICON
+            Column { 
+                spacing: 5; anchors.horizontalCenter: parent.horizontalCenter
+                Image { 
+                    source: "qrc:/icons/location.png"; width: 30; height: 30; fillMode: Image.PreserveAspectFit 
+                    
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            gpsPopup.open()
+                        }
+                    }
+                } 
+                Text { text: "GPS"; color: "#00eaff"; font.pixelSize: 9; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } 
+            }
+            
+            // 3. BATTERY 
+            Column { 
+                spacing: 5; anchors.horizontalCenter: parent.horizontalCenter
+                Text { text: "🔋 92%"; color: "#00FF00"; font.pixelSize: 18; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } 
+                Text { text: "BATTERY"; color: "#888"; font.pixelSize: 9; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter } 
+            }
         }
     }
 
@@ -313,6 +342,112 @@ Window {
                 Rectangle {
                     anchors.fill: parent; color: "transparent"; border.color: "#1A3A4A"; border.width: 1
                 }
+            }
+        }
+    }
+
+
+            // --- GPS POPUP WINDOW ---
+    Popup {
+        id: gpsPopup
+        anchors.centerIn: parent
+        width: 300; height: 180
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnPressOutside
+
+        background: Rectangle {
+            color: "#0A1F29"
+            radius: 15
+            border.color: "#00eaff"
+            border.width: 2
+        }
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 15
+
+            Text {
+                text: "CURRENT LOCATION"
+                color: "#00eaff"
+                font.pixelSize: 14
+                font.bold: true
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Text {
+                text: dbusData.gpsCoordinates 
+                color: "#FFFFFF"
+                font.pixelSize: 16
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Rectangle {
+                width: 80; height: 30
+                color: "#1A3A4A"
+                radius: 5
+                anchors.horizontalCenter: parent.horizontalCenter
+                border.color: "#00eaff"
+
+                Text {
+                    text: "Close"
+                    color: "#00eaff"
+                    anchors.centerIn: parent
+                    font.pixelSize: 12
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: gpsPopup.close()
+                }
+            }
+        }
+    }
+
+    // --- POTHOLE WARNING POPUP ---
+    Popup {
+        id: potholePopup
+        anchors.centerIn: parent
+        width: 320; height: 150
+        modal: true
+        focus: true
+        visible: dbusData.potholeDistance > 0 && dbusData.potholeDistance <= 50
+
+        background: Rectangle {
+            color: "#290A0A"
+            radius: 15
+            border.color: "#FF3333"
+            border.width: 2
+        }
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 15
+
+            Text {
+                text: "⚠️ WARNING: POTHOLE AHEAD"
+                color: "#FF3333"
+                font.pixelSize: 16
+                font.bold: true
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Text {
+                // التعديل هنا: قراءة المسافة بقت من dbusData
+                text: "Pothole in: " + dbusData.potholeDistance.toFixed(1) + " meters"
+                color: "#FFFFFF"
+                font.pixelSize: 15
+                font.bold: true
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            
+            Text {
+                text: "Please reduce your speed"
+                color: "#888"
+                font.pixelSize: 11
+                anchors.horizontalCenter: parent.horizontalCenter
             }
         }
     }

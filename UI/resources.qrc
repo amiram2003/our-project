@@ -10,5 +10,6 @@
         <file>icons/setting.png</file>
         <file>icons/lock.png</file>
         <file>icons/button.png</file>
+        <file>icons/location.png</file>
     </qresource>
 </RCC>
